@@ -36,7 +36,7 @@ func main() {
 	refreshConf()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handler)
-	mux.HandleFunc("/refresh", refreshHandler)
+	mux.HandleFunc("/ref@", refreshHandler)
 
 	if err := http.ListenAndServe(":"+_flag.Port, mux); err != nil {
 		println(err.Error())
