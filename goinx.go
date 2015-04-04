@@ -45,7 +45,13 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, req *http.Request) {
-	host := router[req.Host]
+	var host string
+	name := ".proxy.0xdf.com"
+	if strings.HasSuffix(req.Host, name) {
+		host = req.Host[:len(req.Host)-len(name)]
+	} else {
+		host = router[req.Host]
+	}
 	if host == "" {
 		http.NotFound(w, req)
 		return
