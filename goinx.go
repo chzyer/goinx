@@ -52,14 +52,24 @@ func handler(w http.ResponseWriter, req *http.Request) {
 	} else {
 		host = router[req.Host]
 	}
+
+	proxy := false
 	if host == "" {
-		http.NotFound(w, req)
-		return
+		if req.URL.Query().Get("_goinx_proxy") != "" {
+			// provent recursion
+			http.NotFound(w, req)
+			return
+		}
+		host = req.Host
+		proxy = true
 	}
 	u, err := url.Parse("http://" + host)
 	if err != nil {
 		http.Error(w, "invalid host: "+host+"/"+err.Error(), 500)
 		return
+	}
+	if proxy {
+		u.Query().Set("_goinx_proxy=1")
 	}
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.ServeHTTP(w, req)
