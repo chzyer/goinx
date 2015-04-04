@@ -21,7 +21,7 @@ type Flag struct {
 func NewFlag() *Flag {
 	f := &Flag{}
 	flag.StringVar(&f.Port, "p", "80", "bind port")
-	flag.StringVar(&f.Conf, "c", "router.conf", "bind port")
+	flag.StringVar(&f.Conf, "c", "router.conf", "router file path")
 	flag.Parse()
 	f.Args = flag.Args()
 	return f
