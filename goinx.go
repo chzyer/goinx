@@ -53,7 +53,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		host = router[req.Host]
 	}
 
-	proxy := false
+	isProxy := false
 	if host == "" {
 		if req.URL.Query().Get("_goinx_proxy") != "" {
 			// provent recursion
@@ -61,15 +61,15 @@ func handler(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		host = req.Host
-		proxy = true
+		isProxy = true
 	}
 	u, err := url.Parse("http://" + host)
 	if err != nil {
 		http.Error(w, "invalid host: "+host+"/"+err.Error(), 500)
 		return
 	}
-	if proxy {
-		u.Query().Set("_goinx_proxy=1")
+	if isProxy {
+		u.Query().Set("_goinx_proxy", "1")
 	}
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.ServeHTTP(w, req)
