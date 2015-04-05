@@ -45,31 +45,15 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, req *http.Request) {
-	var host string
-	name := ".proxy.0xdf.com"
-	if strings.HasSuffix(req.Host, name) {
-		host = req.Host[:len(req.Host)-len(name)]
-	} else {
-		host = router[req.Host]
-	}
-
-	isProxy := false
+	host := router[req.Host]
 	if host == "" {
-		if req.URL.Query().Get("_goinx_proxy") != "" {
-			// provent recursion
-			http.NotFound(w, req)
-			return
-		}
-		host = req.Host
-		isProxy = true
+		http.NotFound(w, req)
+		return
 	}
 	u, err := url.Parse("http://" + host)
 	if err != nil {
 		http.Error(w, "invalid host: "+host+"/"+err.Error(), 500)
 		return
-	}
-	if isProxy {
-		u.Query().Set("_goinx_proxy", "1")
 	}
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.ServeHTTP(w, req)
