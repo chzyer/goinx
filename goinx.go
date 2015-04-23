@@ -43,7 +43,7 @@ func main() {
 	mux.HandleFunc("/@router", routerHandler)
 
 	s := &http.Server{
-		Addr:           ":8080",
+		Addr:           ":" + _flag.Port,
 		Handler:        mux,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   time.Minute,
