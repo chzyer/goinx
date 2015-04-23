@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"os"
 	"strings"
+
+	"gopkg.in/logex.v1"
 )
 
 type Flag struct {
@@ -36,7 +38,8 @@ func main() {
 	refreshConf()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handler)
-	mux.HandleFunc("/ref@", refreshHandler)
+	mux.HandleFunc("/@reload", refreshHandler)
+	mux.HandleFunc("/@router", routerHandler)
 
 	if err := http.ListenAndServe(":"+_flag.Port, mux); err != nil {
 		println(err.Error())
@@ -55,12 +58,18 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "invalid host: "+host+"/"+err.Error(), 500)
 		return
 	}
+	logex.Info(req.URL, u)
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.ServeHTTP(w, req)
 }
 
 func refreshHandler(w http.ResponseWriter, req *http.Request) {
 	refreshConf()
+	w.Write([]byte("conf reloaded!\n"))
+}
+
+func routerHandler(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte(router[req.Host] + "\n"))
 }
 
 func refreshConf() {
