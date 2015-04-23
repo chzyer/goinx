@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"gopkg.in/logex.v1"
 )
@@ -41,7 +42,15 @@ func main() {
 	mux.HandleFunc("/@reload", refreshHandler)
 	mux.HandleFunc("/@router", routerHandler)
 
-	if err := http.ListenAndServe(":"+_flag.Port, mux); err != nil {
+	s := &http.Server{
+		Addr:           ":8080",
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   time.Minute,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	if err := s.ListenAndServe(); err != nil {
 		println(err.Error())
 		os.Exit(1)
 	}
