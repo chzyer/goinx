@@ -16,16 +16,23 @@ import (
 )
 
 type Flag struct {
-	Port string
-	Conf string
-	Args []string
+	Port         string
+	Conf         string
+	ReadTimeout  time.Duration // sec
+	WriteTimeout time.Duration // sec
+	Args         []string
 }
 
 func NewFlag() *Flag {
 	f := &Flag{}
 	flag.StringVar(&f.Port, "p", "80", "bind port")
 	flag.StringVar(&f.Conf, "c", "router.conf", "router file path")
+	var readTimeout, writeTimeout int
+	flag.IntVar(&readTimeout, "rt", 10, "read timeout")
+	flag.IntVar(&writeTimeout, "wt", 60, "write timeout")
 	flag.Parse()
+	f.ReadTimeout = time.Duration(readTimeout) * time.Second
+	f.WriteTimeout = time.Duration(writeTimeout) * time.Second
 	f.Args = flag.Args()
 	return f
 }
@@ -45,8 +52,8 @@ func main() {
 	s := &http.Server{
 		Addr:           ":" + _flag.Port,
 		Handler:        mux,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   time.Minute,
+		ReadTimeout:    _flag.ReadTimeout,
+		WriteTimeout:   _flag.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 
