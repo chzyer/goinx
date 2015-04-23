@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -48,6 +50,7 @@ func main() {
 	mux.HandleFunc("/", handler)
 	mux.HandleFunc("/@reload", refreshHandler)
 	mux.HandleFunc("/@router", routerHandler)
+	mux.HandleFunc("/@goroutine", goroutineHandler)
 
 	s := &http.Server{
 		Addr:           ":" + _flag.Port,
@@ -86,6 +89,10 @@ func refreshHandler(w http.ResponseWriter, req *http.Request) {
 
 func routerHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(router[req.Host] + "\n"))
+}
+
+func goroutineHandler(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "%d", runtime.NumGoroutine())
 }
 
 func refreshConf() {
